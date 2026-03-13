@@ -157,14 +157,13 @@
       gap: 8px;
     }
     .qr-card {
-      background: rgba(255, 255, 255, 0.94);
-      border-radius: 14px;
-      padding: 14px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+      /* QR.svg は白塗りのイラスト → 暗い背景上に直接表示 */
+      background: transparent;
+      padding: 0;
     }
     .qr-svg {
       display: block;
-      width: 130px;
+      width: 160px;
       height: auto;
     }
     .qr-caption {
@@ -240,6 +239,17 @@
     .mem-logo {
       height: 21px;
       width: auto;
+    }
+
+    /* ────────────────────────────────────────────
+       DESKTOP  PC レイアウト
+       縦動画を上下フルで表示し、左右に夕焼け背景を延長
+    ──────────────────────────────────────────── */
+    @media (min-width: 768px) {
+      #vid {
+        object-fit: contain;
+        background: transparent; /* 左右は #bg の夕焼け画像をそのまま表示 */
+      }
     }
   </style>
 </head>
