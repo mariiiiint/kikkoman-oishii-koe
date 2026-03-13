@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#1a0e08">
-  <title>縺翫＞縺励＞螢ｰ縺後″縺薙∴縺ｦ縺阪◆ | 繧ｭ繝�さ繝ｼ繝槭Φ 縺翫＞縺励＞險俶�繧偵▽縺上ｊ縺溘＞縲</title>
+  <title>おいしい声がきこえてきた | キッコーマン おいしい記憶をつくりたい。</title>
   <style>
-    /* 笏笏 Reset 笏笏 */
+    /* ── Reset ── */
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     html, body {
@@ -17,14 +17,13 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* 笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏
-       SCENE  蜈ｨ逕ｻ髱｢繧ｹ繝��繧ｸ
-    笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏 */
+    /* ────────────────────────────────────────────
+       SCENE  全画面ステージ
+    ──────────────────────────────────────────── */
     #scene {
       position: fixed;
       inset: 0;
       overflow: hidden;
-      /* 螟慕┥縺代げ繝ｩ繝��繧ｷ繝ｧ繝ｳ�郁レ譎ｯ逕ｻ蜒上′隱ｭ縺ｿ霎ｼ縺ｾ繧後ｋ縺ｾ縺ｧ / 隱ｭ縺ｿ霎ｼ繧√↑縺�ｴ蜷医�繝輔か繝ｼ繝ｫ繝舌ャ繧ｯ� */
       background: linear-gradient(
         to bottom,
         #c9a8d2 0%,
@@ -35,11 +34,9 @@
       );
     }
 
-    /* 笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏
-       BACKGROUND  螟慕┥縺大ｻｶ髟ｷ逕ｻ蜒
-       繝ｻ鬮倥＆ 100vh 蝗ｺ螳 竊 讓ｪ蟷��逕ｻ蜒上�豈皮紫縺ｧ閾ｪ蜍戊ｨ育ｮ
-       繝ｻ逕ｻ髱｢荳ｭ螟ｮ縺ｫ驟咲ｽｮ 竊 蟾ｦ蜿ｳ縺ｫ縺ｿ蜃ｺ縺励◆驛ｨ蛻�� overflow:hidden 縺ｧ繧ｫ繝�ヨ
-    笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏 */
+    /* ────────────────────────────────────────────
+       BACKGROUND  夕焼け延長画像
+    ──────────────────────────────────────────── */
     #bg {
       position: absolute;
       inset: 0;
@@ -51,12 +48,9 @@
       z-index: 0;
     }
 
-    /* 笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏
-       VIDEO  蜍慕判
-       繝ｻ鬮倥＆ 100vh = 逕ｻ髱｢縺ｮ邵ｦ蟷�＞縺｣縺ｱ縺
-       繝ｻ蟷��蜍慕判譛ｬ譚･縺ｮ繧｢繧ｹ繝壹け繝域ｯ斐〒閾ｪ蜍戊ｨ育ｮ暦ｼ育ｸｦ繧ｹ繝槭� 竊 9:16�
-       繝ｻ荳ｭ螟ｮ蟇�○ 竊 逕ｻ髱｢繧医ｊ蟷�′蠎�＞蝣ｴ蜷医� overflow:hidden 縺ｧ繧ｫ繝�ヨ
-    笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏 */
+    /* ────────────────────────────────────────────
+       VIDEO  動画
+    ──────────────────────────────────────────── */
     #vid {
       position: absolute;
       inset: 0;
@@ -64,6 +58,7 @@
       height: 100%;
       object-fit: cover;
       z-index: 1;
+      /* 動画読み込み前／空ファイル時はグラデーションで背景画像の灰色を隠す */
       background: linear-gradient(
         to bottom,
         #c9a8d2 0%,
@@ -74,9 +69,9 @@
       );
     }
 
-    /* 笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏
-       PLAY OVERLAY  繧ｿ繝��縺ｧ蜀咲函
-    笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏 */
+    /* ────────────────────────────────────────────
+       PLAY OVERLAY  タップで再生
+    ──────────────────────────────────────────── */
     #play-overlay {
       position: absolute;
       inset: 0;
@@ -108,9 +103,9 @@
       margin-left: 8px;
     }
 
-    /* 笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏
-       END SCREEN  蜍慕判邨ゆｺ�ｾ#�繧ｪ繝ｼ繝舌�繝ｬ繧､
-    笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏 */
+    /* ────────────────────────────────────────────
+       END SCREEN  動画終了後のオーバーレイ
+    ──────────────────────────────────────────── */
     #end-screen {
       position: absolute;
       inset: 0;
@@ -120,7 +115,6 @@
       align-items: center;
       justify-content: flex-end;
       padding-bottom: max(40px, env(safe-area-inset-bottom, 40px));
-      /* 荳矩Κ繧ｰ繝ｩ繝��繧ｷ繝ｧ繝ｳ: 蜍慕判縺ｮ譛邨ゅヵ繝ｬ繝ｼ繝縺御ｸ企Κ縺ｫ騾上￠縺ｦ隕九∴繧 */
       background: linear-gradient(
         to bottom,
         transparent 0%,
@@ -141,7 +135,7 @@
       padding: 0 24px;
     }
 
-    /* 蜈ｬ蠑上し繧､繝 SVG */
+    /* 公式サイト SVG */
     .official-wrap {
       width: 100%;
       display: flex;
@@ -155,7 +149,7 @@
       filter: drop-shadow(0 2px 12px rgba(0,0,0,0.4));
     }
 
-    /* QR 繧ｳ繝ｼ繝 */
+    /* QR コード */
     .qr-block {
       display: flex;
       flex-direction: column;
@@ -181,7 +175,7 @@
       text-align: center;
     }
 
-    /* 繧ゅ≧荳蠎ｦ隕九ｋ繝懊ち繝ｳ */
+    /* もういちど再生ボタン */
     .replay-btn {
       background: transparent;
       border: 1.5px solid rgba(255,255,255,0.45);
@@ -189,7 +183,7 @@
       padding: 11px 32px;
       border-radius: 30px;
       font-size: 13px;
-      font-family: '貂ｸ譏取悃', 'YuMincho', 'Hiragino Mincho ProN', serif;
+      font-family: '游明朝', 'YuMincho', 'Hiragino Mincho ProN', serif;
       letter-spacing: 0.12em;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
@@ -199,9 +193,9 @@
       background: rgba(255,255,255,0.12);
     }
 
-    /* 笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏
-       HEADER  蜍慕判邨ゆｺ�ｾ後↓陦ｨ遉ｺ
-    笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏 */
+    /* ────────────────────────────────────────────
+       HEADER  動画終了後に表示
+    ──────────────────────────────────────────── */
     #site-header {
       position: fixed;
       top: 0;
@@ -217,7 +211,7 @@
       transform: translateY(0);
     }
 
-    /* Row 1: 逋ｽ縺�く繝�さ繝ｼ繝槭Φ繧ｳ繝ｼ繝昴Ξ繝ｼ繝医ヰ繝ｼ */
+    /* Row 1: 白いキッコーマンロゴバー */
     .header-row1 {
       display: flex;
       align-items: center;
@@ -233,7 +227,7 @@
       width: auto;
     }
 
-    /* Row 2: 縺翫＞縺励＞險俶�繝舌� */
+    /* Row 2: おいしい記憶バー */
     .header-row2 {
       display: flex;
       align-items: center;
@@ -251,14 +245,14 @@
 </head>
 <body>
 
-  <!-- 笏笏 SCENE 笏笏 -->
+  <!-- ── SCENE ── -->
   <div id="scene">
 
-    <!-- 螟慕┥縺題レ譎ｯ逕ｻ蜒擾ｼ亥虚逕ｻ縺ｮ蟾ｦ蜿ｳ繧定�辟ｶ縺ｫ縺､縺ｪ縺仙ｻｶ髟ｷ逕ｻ蜒擾ｼ -->
+    <!-- 夕焼け背景画像 -->
     <img id="bg" src="assets/sunset_bg.jpg" alt=""
          onerror="this.style.display='none'">
 
-    <!-- 繝｡繧､繝ｳ蜍慕判 -->
+    <!-- メイン動画 -->
     <video
       id="vid"
       playsinline
@@ -266,50 +260,50 @@
       x-webkit-airplay="allow"
     ></video>
 
-    <!-- 繧ｿ繝��縺励※蜀咲函 overlay -->
-    <div id="play-overlay" role="button" aria-label="繧ｿ繝��縺励※蜀咲函">
+    <!-- タップして再生 overlay -->
+    <div id="play-overlay" role="button" aria-label="タップして再生">
       <div class="play-circle">
         <div class="play-triangle"></div>
       </div>
     </div>
 
-    <!-- 蜍慕判邨ゆｺ�ｾ end screen -->
+    <!-- 動画終了後 end screen -->
     <div id="end-screen" aria-hidden="true">
       <div class="end-content">
 
-        <!-- 蜈ｬ蠑上し繧､繝郁ｪ伜ｰ SVG -->
+        <!-- 公式サイト誘導 SVG -->
         <div class="official-wrap">
           <img class="official-svg"
                src="assets/official_site.svg"
-               alt="繧ｭ繝�さ繝ｼ繝槭Φ 縺翫＞縺励＞險俶�繧偵▽縺上ｊ縺溘＞縲 蜈ｬ蠑上し繧､繝医�縺薙■繧">
+               alt="キッコーマン おいしい記憶をつくりたい。 公式サイトはこちら">
         </div>
 
-        <!-- QR繧ｳ繝ｼ繝 -->
+        <!-- QRコード -->
         <div class="qr-block">
           <div class="qr-card">
-            <img class="qr-svg" src="assets/QR.svg" alt="QR繧ｳ繝ｼ繝">
+            <img class="qr-svg" src="assets/QR.svg" alt="QRコード">
           </div>
-          <span class="qr-caption">繧ｫ繝｡繝ｩ縺ｧ隱ｭ縺ｿ蜿悶ｋ縺ｨ蜈ｬ蠑上し繧､繝医∈</span>
+          <span class="qr-caption">カメラで読み取ると公式サイトへ</span>
         </div>
 
-        <!-- 繧ゅ≧荳蠎ｦ隕九ｋ繝懊ち繝ｳ -->
-        <button class="replay-btn" id="replay-btn">繧ゅ≧荳蠎ｦ隕九ｋ</button>
+        <!-- もういちど再生ボタン -->
+        <button class="replay-btn" id="replay-btn">もういちど再生する</button>
 
       </div>
     </div>
 
   </div><!-- /scene -->
 
-  <!-- 笏笏 HEADER�亥虚逕ｻ邨ゆｺ�ｾ後↓陦ｨ遉ｺ� 笏笏 -->
+  <!-- ── HEADER（動画終了後に表示） ── -->
   <header id="site-header" aria-hidden="true">
     <div class="header-row1">
       <a href="https://www.kikkoman.com/jp/" target="_blank" rel="noopener">
-        <img class="kk-logo" src="assets/logo_kikkoman.svg" alt="繧ｭ繝�さ繝ｼ繝槭Φ 縺翫＞縺励＞險俶�繧偵▽縺上ｊ縺溘＞縲">
+        <img class="kk-logo" src="assets/logo_kikkoman.svg" alt="キッコーマン おいしい記憶をつくりたい。">
       </a>
     </div>
     <div class="header-row2">
       <a href="https://www.kikkoman.com/jp/memory/" target="_blank" rel="noopener">
-        <img class="mem-logo" src="assets/logo_memory.svg" alt="縺翫＞縺励＞險俶�繧偵▽縺上ｊ縺溘＞縲">
+        <img class="mem-logo" src="assets/logo_memory.svg" alt="おいしい記憶をつくりたい。">
       </a>
     </div>
   </header>
@@ -322,12 +316,13 @@
       const header      = document.getElementById('site-header');
       const replayBtn   = document.getElementById('replay-btn');
 
-      /* ── ビデオソース設定 ── */
+      /* ── 動画ソース選択（?v=01〜15） ── */
       const params = new URLSearchParams(location.search);
       const vParam = params.get('v');
 
       if (vParam && /^\d{1,2}$/.test(vParam)) {
         const n = String(parseInt(vParam, 10)).padStart(2, '0');
+        // src を同期的にセット（非同期 fetch より確実）
         vid.src = 'assets/video_' + n + '.mp4';
         // ポスター画像（存在する場合のみ設定）
         const img = new Image();
@@ -337,7 +332,7 @@
         vid.src = 'assets/drama.mp4';
       }
 
-      /* ── 状態遷移 ── */
+      /* ── 終了画面制御 ── */
       function showEndScreen() {
         endScreen.classList.add('visible');
         endScreen.setAttribute('aria-hidden', 'false');
@@ -352,21 +347,21 @@
         header.setAttribute('aria-hidden', 'true');
       }
 
-      /* ── play イベントで overlay を隠す ── */
+      /* ── play イベントで overlay を隠す（再生が実際に始まったときのみ） ── */
       vid.addEventListener('play', () => {
         playOverlay.classList.add('gone');
         if (!vid.ended) hideEndScreen();
       });
 
-      /* ── タップ／クリックで再生 ── */
+      /* ── タップして再生 ── */
       playOverlay.addEventListener('click', () => {
         vid.play().catch(() => {});
       });
 
-      /* ── 動画終了 → end screen 表示 ── */
+      /* ── 動画終了 → end screen + header 表示 ── */
       vid.addEventListener('ended', showEndScreen);
 
-      /* ── もう一度見るボタン ── */
+      /* ── もういちど再生ボタン ── */
       replayBtn.addEventListener('click', () => {
         hideEndScreen();
         vid.currentTime = 0;
