@@ -322,30 +322,17 @@
       const header      = document.getElementById('site-header');
       const replayBtn   = document.getElementById('replay-btn');
 
-      /* ── ビデオソース設定（同期的に） ──
-         各話専用ファイル（video_01.mp4〜video_15.mp4）が
-         assets/ に追加されたら自動で切り替わります */
+      /* ── ビデオソース設定 ── */
       const params = new URLSearchParams(location.search);
       const vParam = params.get('v');
 
       if (vParam && /^\d{1,2}$/.test(vParam)) {
         const n = String(parseInt(vParam, 10)).padStart(2, '0');
-        const specificSrc    = 'assets/video_' + n + '.mp4';
-        const specificPoster = 'assets/poster_' + n + '.jpg';
-
-        // src を即座にセット（非同期 fetch ではなく）
-        vid.src = specificSrc;
-
-        // ファイルがなければ error イベントで drama.mp4 にフォールバック
-        vid.addEventListener('error', function () {
-          vid.src = 'assets/drama.mp4';
-        }, { once: true });
-
-        // ポスター画像の確認
+        vid.src = 'assets/video_' + n + '.mp4';
+        // ポスター画像（存在する場合のみ設定）
         const img = new Image();
-        img.onload = () => { vid.poster = specificPoster; };
-        img.src = specificPoster;
-
+        img.onload = () => { vid.poster = 'assets/poster_' + n + '.jpg'; };
+        img.src = 'assets/poster_' + n + '.jpg';
       } else {
         vid.src = 'assets/drama.mp4';
       }
@@ -365,21 +352,18 @@
         header.setAttribute('aria-hidden', 'true');
       }
 
-      /* ── play イベントで overlay を隠す（実際に再生が始まったときのみ） ── */
+      /* ── play イベントで overlay を隠す ── */
       vid.addEventListener('play', () => {
         playOverlay.classList.add('gone');
         if (!vid.ended) hideEndScreen();
       });
 
-      /* ── 自動再生試行：iOS は muted なしだと autoplay 不可 ── */
-      vid.play().catch(() => {});
-
-      /* ── タップで再生：再生成功時に play イベントが overlay を隠す ── */
+      /* ── タップ／クリックで再生 ── */
       playOverlay.addEventListener('click', () => {
         vid.play().catch(() => {});
       });
 
-      /* ── 動画終了 → end screen + header 表示 ── */
+      /* ── 動画終了 → end screen 表示 ── */
       vid.addEventListener('ended', showEndScreen);
 
       /* ── もう一度見るボタン ── */
