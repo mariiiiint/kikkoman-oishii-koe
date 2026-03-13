@@ -322,35 +322,35 @@
       const header      = document.getElementById('site-header');
       const replayBtn   = document.getElementById('replay-btn');
 
-      /* 笏笏 蜍慕判繧ｽ繝ｼ繧ｹ險ｭ螳夲ｼ?v=01縲15� 笏笏
-         迴ｾ蝨ｨ縺ｯ縺吶∋縺ｦ蜷後§ drama.mp4 繧偵ム繝溘�縺ｨ縺励※菴ｿ逕ｨ縲
-         蜷�分蜿ｷ蟆ら畑縺ｮ蜍慕判繝輔ぃ繧､繝ｫ��ideo_01.mp4縲忻ideo_15.mp4�峨′
-         assets/ 縺ｫ霑ｽ蜉縺輔ｌ縺溘ｉ閾ｪ蜍輔〒蛻�ｊ譖ｿ繧上ｊ縺ｾ縺吶 */
+      /* ── ビデオソース設定（同期的に） ──
+         各話専用ファイル（video_01.mp4〜video_15.mp4）が
+         assets/ に追加されたら自動で切り替わります */
       const params = new URLSearchParams(location.search);
       const vParam = params.get('v');
 
       if (vParam && /^\d{1,2}$/.test(vParam)) {
         const n = String(parseInt(vParam, 10)).padStart(2, '0');
-        const specificSrc = 'assets/video_' + n + '.mp4';
+        const specificSrc    = 'assets/video_' + n + '.mp4';
         const specificPoster = 'assets/poster_' + n + '.jpg';
 
-        // 蟆ら畑繝輔ぃ繧､繝ｫ縺悟ｭ伜惠縺吶ｋ縺 fetch 縺ｧ遒ｺ隱
-        fetch(specificSrc, { method: 'HEAD' })
-          .then(r => {
-            vid.src = r.ok ? specificSrc : 'assets/drama.mp4';
-          })
-          .catch(() => { vid.src = 'assets/drama.mp4'; });
+        // src を即座にセット（非同期 fetch ではなく）
+        vid.src = specificSrc;
 
-        fetch(specificPoster, { method: 'HEAD' })
-          .then(r => {
-            if (r.ok) vid.poster = specificPoster;
-          })
-          .catch(() => {});
+        // ファイルがなければ error イベントで drama.mp4 にフォールバック
+        vid.addEventListener('error', function () {
+          vid.src = 'assets/drama.mp4';
+        }, { once: true });
+
+        // ポスター画像の確認
+        const img = new Image();
+        img.onload = () => { vid.poster = specificPoster; };
+        img.src = specificPoster;
+
       } else {
         vid.src = 'assets/drama.mp4';
       }
 
-      /* 笏笏 迥ｶ諷矩�遘ｻ 笏笏 */
+      /* ── 状態遷移 ── */
       function showEndScreen() {
         endScreen.classList.add('visible');
         endScreen.setAttribute('aria-hidden', 'false');
@@ -365,31 +365,28 @@
         header.setAttribute('aria-hidden', 'true');
       }
 
-      /* 笏笏 閾ｪ蜍募�逕溯ｩｦ陦鯉ｼ�OS 縺ｯ muted 縺ｪ縺励□縺ｨ autoplay 荳榊庄� 笏笏 */
-      vid.play()
-        .then(() => { playOverlay.classList.add('gone'); })
-        .catch(() => { /* 繝ｦ繝ｼ繧ｶ繝ｼ謫堺ｽ懷ｾ�■ */ });
-
-      /* 笏笏 繧ｿ繝��縺ｧ蜀咲函 笏笏 */
-      playOverlay.addEventListener('click', () => {
-        vid.play().catch(() => {});
-        playOverlay.classList.add('gone');
-      });
-
-      /* 笏笏 蜍慕判邨ゆｺ 竊 end screen + header 陦ｨ遉ｺ 笏笏 */
-      vid.addEventListener('ended', showEndScreen);
-
-      /* 笏笏 蜀咲函荳ｭ縺ｯ end screen 繧帝國縺 笏笏 */
+      /* ── play イベントで overlay を隠す（実際に再生が始まったときのみ） ── */
       vid.addEventListener('play', () => {
+        playOverlay.classList.add('gone');
         if (!vid.ended) hideEndScreen();
       });
 
-      /* 笏笏 繧ゅ≧荳蠎ｦ隕九ｋ繝懊ち繝ｳ 笏笏 */
+      /* ── 自動再生試行：iOS は muted なしだと autoplay 不可 ── */
+      vid.play().catch(() => {});
+
+      /* ── タップで再生：再生成功時に play イベントが overlay を隠す ── */
+      playOverlay.addEventListener('click', () => {
+        vid.play().catch(() => {});
+      });
+
+      /* ── 動画終了 → end screen + header 表示 ── */
+      vid.addEventListener('ended', showEndScreen);
+
+      /* ── もう一度見るボタン ── */
       replayBtn.addEventListener('click', () => {
         hideEndScreen();
         vid.currentTime = 0;
         vid.play().catch(() => {});
-        playOverlay.classList.add('gone');
       });
     })();
   </script>
