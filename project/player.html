@@ -113,7 +113,8 @@
       display: none;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-end;
+      justify-content: center;
+      padding-top: 100px; /* ヘッダー (52px + 38px = 90px) 分を確保 */
       padding-bottom: max(40px, env(safe-area-inset-bottom, 40px));
       background: linear-gradient(
         to bottom,
@@ -160,18 +161,13 @@
       /* QR.svg は白塗りのイラスト → 暗い背景上に直接表示 */
       background: transparent;
       padding: 0;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
     }
     .qr-svg {
       display: block;
       width: 160px;
       height: auto;
-    }
-    .qr-caption {
-      font-family: 'Helvetica Neue', Arial, sans-serif;
-      font-size: 11px;
-      color: rgba(255, 255, 255, 0.75);
-      letter-spacing: 0.08em;
-      text-align: center;
     }
 
     /* もういちど再生ボタン */
@@ -288,12 +284,12 @@
                alt="キッコーマン おいしい記憶をつくりたい。 公式サイトはこちら">
         </div>
 
-        <!-- QRコード -->
+        <!-- QRコード：タップでカメラ起動 -->
         <div class="qr-block">
-          <div class="qr-card">
-            <img class="qr-svg" src="assets/QR.svg" alt="QRコード">
+          <div class="qr-card" id="qr-btn"
+               role="button" aria-label="カメラを起動してQRコードを読み込む">
+            <img class="qr-svg" src="assets/QR.svg" alt="他のQRも読み込む">
           </div>
-          <span class="qr-caption">カメラで読み取ると公式サイトへ</span>
         </div>
 
         <!-- もういちど再生ボタン -->
@@ -376,6 +372,19 @@
         hideEndScreen();
         vid.currentTime = 0;
         vid.play().catch(() => {});
+      });
+
+      /* ── QR 読み込みボタン：カメラ起動 ── */
+      document.getElementById('qr-btn').addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.capture = 'environment'; // 背面カメラを優先
+        document.body.appendChild(input);
+        input.click();
+        const cleanup = () => { if (input.parentNode) input.remove(); };
+        input.addEventListener('change', cleanup);
+        setTimeout(cleanup, 60000); // 1分後に自動クリーンアップ
       });
     })();
   </script>
