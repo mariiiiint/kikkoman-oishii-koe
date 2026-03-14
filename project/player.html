@@ -57,15 +57,8 @@
       z-index: 1;
       /* 初期値: JS が alignVid() で上書きするまでの fallback */
       inset: 0;
-      /* 動画読み込み前にグレーが透けて見えないよう夕焼けグラデーション */
-      background: linear-gradient(
-        to bottom,
-        #c9a8d2 0%,
-        #e895a0 28%,
-        #e88478 52%,
-        #e87040 74%,
-        #f0a018 100%
-      );
+      /* 動画読み込み前にグレーが透けて見えないよう bg.jpg を表示 */
+      background: url('assets/bg.jpg') center / cover no-repeat;
     }
 
     /* ────────────────────────────────────────────
