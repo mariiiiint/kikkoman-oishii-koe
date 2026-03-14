@@ -59,7 +59,7 @@
       /* 縦横比を保ったまま縦幅を常にフル表示 */
       object-fit: contain;
       z-index: 1;
-      /* レターボックス部分・読み込み前は夕焼けグラデーションで埋める */
+      /* モバイル: 上下レターボックスはグラデーションで埋める */
       background: linear-gradient(
         to bottom,
         #c9a8d2 0%,
@@ -68,6 +68,10 @@
         #e87040 74%,
         #f0a018 100%
       );
+    }
+    /* PC: 左右レターボックスは sunset_bg.jpg（web.png）を透過表示 */
+    @media (min-width: 768px) {
+      #vid { background: transparent; }
     }
 
     /* ────────────────────────────────────────────
@@ -410,7 +414,6 @@
         }
       });
 
-      /* ── 動画終了 → end screen + header 表示 ── */
       /* ── 動画終了 → バー非表示 + end screen 表示 ── */
       vid.addEventListener('ended', () => {
         progressBar.classList.remove('visible');
