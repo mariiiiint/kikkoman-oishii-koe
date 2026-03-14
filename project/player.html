@@ -53,25 +53,10 @@
     ──────────────────────────────────────────── */
     #vid {
       position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      /* 縦横比を保ったまま縦幅を常にフル表示 */
-      object-fit: contain;
+      object-fit: cover;
       z-index: 1;
-      /* モバイル: 上下レターボックスはグラデーションで埋める */
-      background: linear-gradient(
-        to bottom,
-        #c9a8d2 0%,
-        #e895a0 28%,
-        #e88478 52%,
-        #e87040 74%,
-        #f0a018 100%
-      );
-    }
-    /* PC: 左右レターボックスは sunset_bg.jpg（web.png）を透過表示 */
-    @media (min-width: 768px) {
-      #vid { background: transparent; }
+      /* 初期値: JS が alignVid() で上書きするまでの fallback */
+      inset: 0;
     }
 
     /* ────────────────────────────────────────────
@@ -180,9 +165,8 @@
     ──────────────────────────────────────────── */
     #progress-bar {
       position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      bottom: 0; /* JS が alignVid() で上書き */
+      left: 0;   /* JS が alignVid() で上書き */
       height: 2px;
       z-index: 6;
       background: rgba(255, 255, 255, 0.22);
@@ -347,6 +331,48 @@
       const replayBtn    = document.getElementById('replay-btn');
       const progressBar  = document.getElementById('progress-bar');
       const progressFill = document.getElementById('progress-fill');
+
+      /* ── 背景画像のグレー矩形に動画をぴったり合わせる ──
+         web.png (7608×4279) のグレー矩形座標（実測値）
+         object-fit: cover で表示した際の位置をリアルタイム計算し
+         #vid を CSS inset ではなく style で直接配置する           */
+      const IMG_W = 7608, IMG_H = 4279;
+      const GRAY_X = 2602, GRAY_Y = 0, GRAY_W = 2405, GRAY_H = 4277;
+
+      function alignVid() {
+        const vw = window.innerWidth, vh = window.innerHeight;
+        // object-fit: cover のスケール計算
+        const scale = Math.max(vw / IMG_W, vh / IMG_H);
+        const ox = (IMG_W * scale - vw) / 2; // 左側にはみ出す量
+        const oy = (IMG_H * scale - vh) / 2; // 上側にはみ出す量
+
+        // グレー矩形のビューポート座標
+        const gx = GRAY_X * scale - ox;
+        const gy = GRAY_Y * scale - oy;
+        const gw = GRAY_W * scale;
+        const gh = GRAY_H * scale;
+
+        // ビューポートにクランプ（はみ出す場合は映像を小さく）
+        const cx = Math.max(0, gx);
+        const cy = Math.max(0, gy);
+        const cw = Math.min(gw, vw - cx);
+        const ch = Math.min(gh, vh - cy);
+
+        vid.style.inset  = 'auto';
+        vid.style.left   = cx + 'px';
+        vid.style.top    = cy + 'px';
+        vid.style.width  = cw + 'px';
+        vid.style.height = ch + 'px';
+
+        // プログレスバーを動画の下端に合わせる
+        progressBar.style.left   = cx + 'px';
+        progressBar.style.width  = cw + 'px';
+        progressBar.style.right  = 'auto';
+        progressBar.style.bottom = Math.max(0, vh - cy - ch) + 'px';
+      }
+
+      alignVid();
+      window.addEventListener('resize', alignVid);
 
       /* ── 動画ソース選択（?v=01〜15） ── */
       const params = new URLSearchParams(location.search);
