@@ -57,6 +57,15 @@
       z-index: 1;
       /* 初期値: JS が alignVid() で上書きするまでの fallback */
       inset: 0;
+      /* 動画読み込み前にグレーが透けて見えないよう夕焼けグラデーション */
+      background: linear-gradient(
+        to bottom,
+        #c9a8d2 0%,
+        #e895a0 28%,
+        #e88478 52%,
+        #e87040 74%,
+        #f0a018 100%
+      );
     }
 
     /* ────────────────────────────────────────────
@@ -358,17 +367,19 @@
         const cw = Math.min(gw, vw - cx);
         const ch = Math.min(gh, vh - cy);
 
+        // 1px 拡張してサブピクセルのヘアラインをカバー
+        const px = 1;
         vid.style.inset  = 'auto';
-        vid.style.left   = cx + 'px';
-        vid.style.top    = cy + 'px';
-        vid.style.width  = cw + 'px';
-        vid.style.height = ch + 'px';
+        vid.style.left   = (Math.floor(cx) - px) + 'px';
+        vid.style.top    = (Math.floor(cy) - px) + 'px';
+        vid.style.width  = (Math.ceil(cw) + px * 2) + 'px';
+        vid.style.height = (Math.ceil(ch) + px * 2) + 'px';
 
-        // プログレスバーを動画の下端に合わせる
-        progressBar.style.left   = cx + 'px';
-        progressBar.style.width  = cw + 'px';
+        // プログレスバーを動画の下端に合わせる（拡張なし）
+        progressBar.style.left   = Math.floor(cx) + 'px';
+        progressBar.style.width  = Math.ceil(cw) + 'px';
         progressBar.style.right  = 'auto';
-        progressBar.style.bottom = Math.max(0, vh - cy - ch) + 'px';
+        progressBar.style.bottom = Math.max(0, vh - Math.ceil(cy + ch)) + 'px';
       }
 
       alignVid();
