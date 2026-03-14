@@ -163,7 +163,21 @@
       height: 100%;
       background: rgba(255, 255, 255, 0.90);
       width: 0%;
+      transition: width 0.05s linear;
     }
+
+    /* シーク用透明ヒット領域（一時停止中のみ有効） */
+    #progress-handle {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 44px; /* タッチしやすい大きさ */
+      z-index: 7;
+      pointer-events: none;
+      touch-action: none;
+      cursor: pointer;
+    }
+    #progress-handle.visible { pointer-events: auto; }
 
     /* ────────────────────────────────────────────
        HEADER  動画終了後に表示
@@ -229,6 +243,8 @@
     <div id="progress-bar" aria-hidden="true">
       <div id="progress-fill"></div>
     </div>
+    <!-- シーク用透明ヒット領域 -->
+    <div id="progress-handle" aria-hidden="true"></div>
 
     <!-- タップして再生 overlay -->
     <div id="play-overlay" role="button" aria-label="タップして再生">
@@ -288,6 +304,7 @@
       const replayBtn      = document.getElementById('replay-btn');
       const progressBar    = document.getElementById('progress-bar');
       const progressFill   = document.getElementById('progress-fill');
+      const progressHandle = document.getElementById('progress-handle');
       const qrSvgImg       = document.getElementById('qr-svg-img');
       const officialSvgImg = document.getElementById('official-svg-img');
       const qrBtn          = document.getElementById('qr-btn');
@@ -334,11 +351,18 @@
         vid.style.width  = (Math.ceil(cw) + px * 2) + 'px';
         vid.style.height = (Math.ceil(ch) + px * 2) + 'px';
 
-        /* プログレスバー */
-        progressBar.style.left   = Math.floor(cx) + 'px';
-        progressBar.style.width  = Math.ceil(cw) + 'px';
+        /* プログレスバー＋シークハンドル */
+        const barLeft   = Math.floor(cx);
+        const barWidth  = Math.ceil(cw);
+        const barBottom = Math.max(0, vh - Math.ceil(cy + ch));
+        progressBar.style.left   = barLeft + 'px';
+        progressBar.style.width  = barWidth + 'px';
         progressBar.style.right  = 'auto';
-        progressBar.style.bottom = Math.max(0, vh - Math.ceil(cy + ch)) + 'px';
+        progressBar.style.bottom = barBottom + 'px';
+        progressHandle.style.left   = barLeft + 'px';
+        progressHandle.style.width  = barWidth + 'px';
+        progressHandle.style.right  = 'auto';
+        progressHandle.style.bottom = barBottom + 'px';
 
         /* エンドスクリーン SVG オーバーレイ（動画と同じ座標・サイズ） */
         [qrSvgImg, officialSvgImg].forEach(el => {
@@ -401,6 +425,7 @@
       vid.addEventListener('play', () => {
         playOverlay.classList.add('gone');
         progressBar.classList.remove('visible');
+        progressHandle.classList.remove('visible');
         if (!vid.ended) hideEndScreen();
       });
 
@@ -419,7 +444,10 @@
       });
 
       vid.addEventListener('pause', () => {
-        if (!vid.ended) progressBar.classList.add('visible');
+        if (!vid.ended) {
+          progressBar.classList.add('visible');
+          progressHandle.classList.add('visible');
+        }
       });
 
       vid.addEventListener('timeupdate', () => {
@@ -430,7 +458,42 @@
 
       vid.addEventListener('ended', () => {
         progressBar.classList.remove('visible');
+        progressHandle.classList.remove('visible');
         showEndScreen();
+      });
+
+      /* ── プログレスバー シーク ── */
+      function seekByClientX(clientX) {
+        const rect = progressHandle.getBoundingClientRect();
+        const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+        if (vid.duration) {
+          vid.currentTime = ratio * vid.duration;
+          progressFill.style.width = (ratio * 100) + '%';
+        }
+      }
+
+      progressHandle.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        seekByClientX(e.touches[0].clientX);
+      }, { passive: false });
+
+      progressHandle.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        seekByClientX(e.touches[0].clientX);
+      }, { passive: false });
+
+      progressHandle.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        seekByClientX(e.clientX);
+        const onMove = (e) => seekByClientX(e.clientX);
+        const onUp   = () => {
+          document.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseup', onUp);
+        };
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
       });
 
       replayBtn.addEventListener('click', () => {
