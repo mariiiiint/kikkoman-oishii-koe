@@ -171,6 +171,28 @@
       height: auto;
     }
 
+    /* ────────────────────────────────────────────
+       PROGRESS BAR  一時停止中のみ表示
+    ──────────────────────────────────────────── */
+    #progress-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      z-index: 6;
+      background: rgba(255, 255, 255, 0.22);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+    #progress-bar.visible { opacity: 1; }
+    #progress-fill {
+      height: 100%;
+      background: rgba(255, 255, 255, 0.82);
+      width: 0%;
+    }
+
     /* もういちど再生ボタン */
     .replay-btn {
       background: transparent;
@@ -257,6 +279,11 @@
       x-webkit-airplay="allow"
     ></video>
 
+    <!-- 再生進行バー（一時停止中のみ表示） -->
+    <div id="progress-bar" aria-hidden="true">
+      <div id="progress-fill"></div>
+    </div>
+
     <!-- タップして再生 overlay -->
     <div id="play-overlay" role="button" aria-label="タップして再生">
       <div class="play-circle">
@@ -309,11 +336,13 @@
 
   <script>
     (function () {
-      const vid         = document.getElementById('vid');
-      const playOverlay = document.getElementById('play-overlay');
-      const endScreen   = document.getElementById('end-screen');
-      const header      = document.getElementById('site-header');
-      const replayBtn   = document.getElementById('replay-btn');
+      const vid          = document.getElementById('vid');
+      const playOverlay  = document.getElementById('play-overlay');
+      const endScreen    = document.getElementById('end-screen');
+      const header       = document.getElementById('site-header');
+      const replayBtn    = document.getElementById('replay-btn');
+      const progressBar  = document.getElementById('progress-bar');
+      const progressFill = document.getElementById('progress-fill');
 
       /* ── 動画ソース選択（?v=01〜15） ── */
       const params = new URLSearchParams(location.search);
@@ -349,6 +378,7 @@
       /* ── play イベントで overlay を隠す（再生が実際に始まったときのみ） ── */
       vid.addEventListener('play', () => {
         playOverlay.classList.add('gone');
+        progressBar.classList.remove('visible');
         if (!vid.ended) hideEndScreen();
       });
 
@@ -357,8 +387,35 @@
         vid.play().catch(() => {});
       });
 
+      /* ── 再生中にタップ → 一時停止 / 再開 ── */
+      document.getElementById('scene').addEventListener('click', (e) => {
+        if (!playOverlay.classList.contains('gone')) return; // まだ再生前
+        if (endScreen.classList.contains('visible')) return; // エンドスクリーン表示中
+        if (vid.paused) {
+          vid.play().catch(() => {});
+        } else {
+          vid.pause();
+        }
+      });
+
+      /* ── 一時停止 → プログレスバー表示 ── */
+      vid.addEventListener('pause', () => {
+        if (!vid.ended) progressBar.classList.add('visible');
+      });
+
+      /* ── 進行状況を随時更新 ── */
+      vid.addEventListener('timeupdate', () => {
+        if (vid.duration) {
+          progressFill.style.width = (vid.currentTime / vid.duration * 100) + '%';
+        }
+      });
+
       /* ── 動画終了 → end screen + header 表示 ── */
-      vid.addEventListener('ended', showEndScreen);
+      /* ── 動画終了 → バー非表示 + end screen 表示 ── */
+      vid.addEventListener('ended', () => {
+        progressBar.classList.remove('visible');
+        showEndScreen();
+      });
 
       /* ── もういちど再生ボタン ── */
       replayBtn.addEventListener('click', () => {
