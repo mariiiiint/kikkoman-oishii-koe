@@ -58,9 +58,7 @@
       position: absolute;
       object-fit: cover;
       z-index: 1;
-      /* 初期値: JS が alignVid() で上書きするまでの fallback */
       inset: 0;
-      /* 動画読み込み前にグレーが透けて見えないよう bg.jpg を表示 */
       background: url('assets/bg.jpg') center / cover no-repeat;
     }
 
@@ -110,55 +108,40 @@
     }
     #end-screen.visible { display: block; }
 
-    /* コンテンツ列（幅・左端は JS で動画に合わせる） */
-    .end-content {
+    /* SVGオーバーレイ: 動画と同じ座標・サイズ（JSが配置） */
+    .end-overlay-svg {
       position: absolute;
-      top: 90px; /* ヘッダー分 */
-      bottom: 0;
-      left: 0;   /* JS が上書き */
-      width: 100%; /* JS が上書き */
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding-bottom: max(48px, env(safe-area-inset-bottom, 48px));
-    }
-
-    /* 上下の可変スペーサー */
-    .end-space { flex: 1; }
-
-    /* QR + 公式サイト SVG をまとめるコンテナ */
-    .end-svgs {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      width: 100%;
-    }
-
-    /* QR ブロック */
-    .qr-block {
-      width: 100%;
-    }
-    .qr-card {
-      width: 100%;
+      pointer-events: none;
       display: block;
+    }
+
+    /* タップ可能な透明領域（JSが座標を設定） */
+    .end-tap-area {
+      position: absolute;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
-    }
-    .qr-svg {
       display: block;
-      width: 100%;
-      height: auto;
     }
 
-    /* 公式サイト SVG */
-    .official-wrap {
-      width: 100%;
+    /* もういちど再生ボタン（JSが座標を設定） */
+    .replay-btn {
+      position: absolute;
+      transform: translateX(-50%);
+      background: transparent;
+      border: 1.5px solid rgba(255,255,255,0.45);
+      color: rgba(255,255,255,0.88);
+      padding: 11px 36px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-family: 'Hannari Mincho', 'はんなり明朝', 'YuMincho', serif;
+      letter-spacing: 0.14em;
+      cursor: pointer;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.2s, border-color 0.2s;
     }
-    .official-svg {
-      display: block;
-      width: 100%;
-      height: auto;
+    .replay-btn:active {
+      background: rgba(255,255,255,0.12);
     }
 
     /* ────────────────────────────────────────────
@@ -166,8 +149,8 @@
     ──────────────────────────────────────────── */
     #progress-bar {
       position: absolute;
-      bottom: 0; /* JS が alignVid() で上書き */
-      left: 0;   /* JS が alignVid() で上書き */
+      bottom: 0;
+      left: 0;
       height: 5px;
       z-index: 6;
       background: rgba(255, 255, 255, 0.28);
@@ -180,24 +163,6 @@
       height: 100%;
       background: rgba(255, 255, 255, 0.90);
       width: 0%;
-    }
-
-    /* もういちど再生ボタン */
-    .replay-btn {
-      background: transparent;
-      border: 1.5px solid rgba(255,255,255,0.45);
-      color: rgba(255,255,255,0.88);
-      padding: 11px 36px;
-      border-radius: 30px;
-      font-size: 14px;
-      font-family: 'Hannari Mincho', 'はんなり明朝', 'YuMincho', serif;
-      letter-spacing: 0.14em;
-      cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      transition: background 0.2s, border-color 0.2s;
-    }
-    .replay-btn:active {
-      background: rgba(255,255,255,0.12);
     }
 
     /* ────────────────────────────────────────────
@@ -218,7 +183,6 @@
       transform: translateY(0);
     }
 
-    /* Row 1: 白いキッコーマンロゴバー */
     .header-row1 {
       display: flex;
       align-items: center;
@@ -229,12 +193,8 @@
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
     }
-    .kk-logo {
-      height: 38px;
-      width: auto;
-    }
+    .kk-logo { height: 38px; width: auto; }
 
-    /* Row 2: おいしい記憶バー */
     .header-row2 {
       display: flex;
       align-items: center;
@@ -244,10 +204,7 @@
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
     }
-    .mem-logo {
-      height: 21px;
-      width: auto;
-    }
+    .mem-logo { height: 21px; width: auto; }
 
   </style>
 </head>
@@ -282,40 +239,28 @@
 
     <!-- 動画終了後 end screen -->
     <div id="end-screen" aria-hidden="true">
-      <div class="end-content">
 
-        <!-- 上スペーサー -->
-        <div class="end-space"></div>
+      <!-- SVGs: 動画と同じ位置・サイズでオーバーレイ（JSが配置） -->
+      <!-- QR.svg: コンテンツはcanvasの約40%位置 -->
+      <img class="end-overlay-svg" id="qr-svg-img"
+           src="assets/QR.svg" alt="" draggable="false">
+      <!-- official_site.svg: コンテンツはcanvasの約58%位置 -->
+      <img class="end-overlay-svg" id="official-svg-img"
+           src="assets/official_site.svg" alt="" draggable="false">
 
-        <!-- SVG 群（QR が上、公式サイトが下） -->
-        <div class="end-svgs">
+      <!-- QR タップ領域（透明、JSが座標設定） -->
+      <div id="qr-btn" class="end-tap-area"
+           role="button" aria-label="カメラを起動してQRコードを読み込む"></div>
 
-          <!-- QR：タップでカメラ起動 -->
-          <div class="qr-block">
-            <div class="qr-card" id="qr-btn"
-                 role="button" aria-label="カメラを起動してQRコードを読み込む">
-              <img class="qr-svg" src="assets/QR.svg" alt="他のQRも読み込む">
-            </div>
-          </div>
+      <!-- 公式サイト タップ領域 -->
+      <a id="official-btn" class="end-tap-area"
+         href="https://www.kikkoman.com/jp/memory"
+         target="_blank" rel="noopener"
+         aria-label="公式サイトはこちら"></a>
 
-          <!-- 公式サイト誘導 -->
-          <div class="official-wrap">
-            <a href="https://www.kikkoman.com/jp/memory" target="_blank" rel="noopener">
-              <img class="official-svg"
-                   src="assets/official_site.svg"
-                   alt="キッコーマン おいしい記憶をつくりたい。 公式サイトはこちら">
-            </a>
-          </div>
+      <!-- もういちど再生ボタン（JSが位置設定） -->
+      <button class="replay-btn" id="replay-btn">もういちど聴く</button>
 
-        </div>
-
-        <!-- 下スペーサー -->
-        <div class="end-space"></div>
-
-        <!-- もういちど再生ボタン -->
-        <button class="replay-btn" id="replay-btn">もういちど聴く</button>
-
-      </div>
     </div>
 
   </div><!-- /scene -->
@@ -336,14 +281,17 @@
 
   <script>
     (function () {
-      const vid          = document.getElementById('vid');
-      const playOverlay  = document.getElementById('play-overlay');
-      const endScreen    = document.getElementById('end-screen');
-      const header       = document.getElementById('site-header');
-      const replayBtn    = document.getElementById('replay-btn');
-      const progressBar  = document.getElementById('progress-bar');
-      const progressFill = document.getElementById('progress-fill');
-      const endContent   = document.querySelector('.end-content');
+      const vid            = document.getElementById('vid');
+      const playOverlay    = document.getElementById('play-overlay');
+      const endScreen      = document.getElementById('end-screen');
+      const header         = document.getElementById('site-header');
+      const replayBtn      = document.getElementById('replay-btn');
+      const progressBar    = document.getElementById('progress-bar');
+      const progressFill   = document.getElementById('progress-fill');
+      const qrSvgImg       = document.getElementById('qr-svg-img');
+      const officialSvgImg = document.getElementById('official-svg-img');
+      const qrBtn          = document.getElementById('qr-btn');
+      const officialBtn    = document.getElementById('official-btn');
 
       /* ── 背景画像のグレー矩形に動画をぴったり合わせる ──
          web.png (7608×4279) のグレー矩形座標（実測値）
@@ -352,42 +300,70 @@
       const IMG_W = 7608, IMG_H = 4279;
       const GRAY_X = 2602, GRAY_Y = 0, GRAY_W = 2405, GRAY_H = 4277;
 
+      /* SVGのviewBox高さ（1026.92）に対するコンテンツ位置（実測値）
+         QR.svg:           y ≈ 39.7% – 46.1%
+         official_site.svg: y ≈ 57.4% – 59.9%                    */
+      const QR_Y_START  = 0.36;
+      const QR_Y_END    = 0.49;
+      const OFF_Y_START = 0.54;
+      const OFF_Y_END   = 0.63;
+      const REPLAY_Y    = 0.79;
+
       function alignVid() {
         const vw = window.innerWidth, vh = window.innerHeight;
-        // object-fit: cover のスケール計算
         const scale = Math.max(vw / IMG_W, vh / IMG_H);
-        const ox = (IMG_W * scale - vw) / 2; // 左側にはみ出す量
-        const oy = (IMG_H * scale - vh) / 2; // 上側にはみ出す量
+        const ox = (IMG_W * scale - vw) / 2;
+        const oy = (IMG_H * scale - vh) / 2;
 
-        // グレー矩形のビューポート座標
         const gx = GRAY_X * scale - ox;
         const gy = GRAY_Y * scale - oy;
         const gw = GRAY_W * scale;
         const gh = GRAY_H * scale;
 
-        // ビューポートにクランプ（はみ出す場合は映像を小さく）
         const cx = Math.max(0, gx);
         const cy = Math.max(0, gy);
         const cw = Math.min(gw, vw - cx);
         const ch = Math.min(gh, vh - cy);
 
-        // 1px 拡張してサブピクセルのヘアラインをカバー
         const px = 1;
+
+        /* 動画 */
         vid.style.inset  = 'auto';
         vid.style.left   = (Math.floor(cx) - px) + 'px';
         vid.style.top    = (Math.floor(cy) - px) + 'px';
         vid.style.width  = (Math.ceil(cw) + px * 2) + 'px';
         vid.style.height = (Math.ceil(ch) + px * 2) + 'px';
 
-        // プログレスバーを動画の下端に合わせる（拡張なし）
+        /* プログレスバー */
         progressBar.style.left   = Math.floor(cx) + 'px';
         progressBar.style.width  = Math.ceil(cw) + 'px';
         progressBar.style.right  = 'auto';
         progressBar.style.bottom = Math.max(0, vh - Math.ceil(cy + ch)) + 'px';
 
-        // エンドスクリーンのコンテンツ幅を動画に合わせる
-        endContent.style.left  = Math.floor(cx) + 'px';
-        endContent.style.width = Math.ceil(cw) + 'px';
+        /* エンドスクリーン SVG オーバーレイ（動画と同じ座標・サイズ） */
+        [qrSvgImg, officialSvgImg].forEach(el => {
+          el.style.inset  = 'auto';
+          el.style.left   = (Math.floor(cx) - px) + 'px';
+          el.style.top    = (Math.floor(cy) - px) + 'px';
+          el.style.width  = (Math.ceil(cw) + px * 2) + 'px';
+          el.style.height = (Math.ceil(ch) + px * 2) + 'px';
+        });
+
+        /* QR タップ領域 */
+        qrBtn.style.left   = Math.floor(cx) + 'px';
+        qrBtn.style.width  = Math.ceil(cw) + 'px';
+        qrBtn.style.top    = Math.floor(cy + QR_Y_START * ch) + 'px';
+        qrBtn.style.height = Math.ceil((QR_Y_END - QR_Y_START) * ch) + 'px';
+
+        /* 公式サイト タップ領域 */
+        officialBtn.style.left   = Math.floor(cx) + 'px';
+        officialBtn.style.width  = Math.ceil(cw) + 'px';
+        officialBtn.style.top    = Math.floor(cy + OFF_Y_START * ch) + 'px';
+        officialBtn.style.height = Math.ceil((OFF_Y_END - OFF_Y_START) * ch) + 'px';
+
+        /* もういちど聴くボタン（中央揃え） */
+        replayBtn.style.left = (Math.floor(cx) + Math.ceil(cw) / 2) + 'px';
+        replayBtn.style.top  = Math.floor(cy + REPLAY_Y * ch) + 'px';
       }
 
       alignVid();
@@ -399,9 +375,7 @@
 
       if (vParam && /^\d{1,2}$/.test(vParam)) {
         const n = String(parseInt(vParam, 10)).padStart(2, '0');
-        // src を同期的にセット（非同期 fetch より確実）
         vid.src = 'assets/video_' + n + '.mp4';
-        // ポスター画像（存在する場合のみ設定）
         const img = new Image();
         img.onload = () => { vid.poster = 'assets/poster_' + n + '.jpg'; };
         img.src = 'assets/poster_' + n + '.jpg';
@@ -424,22 +398,19 @@
         header.setAttribute('aria-hidden', 'true');
       }
 
-      /* ── play イベントで overlay を隠す（再生が実際に始まったときのみ） ── */
       vid.addEventListener('play', () => {
         playOverlay.classList.add('gone');
         progressBar.classList.remove('visible');
         if (!vid.ended) hideEndScreen();
       });
 
-      /* ── タップして再生 ── */
       playOverlay.addEventListener('click', () => {
         vid.play().catch(() => {});
       });
 
-      /* ── 再生中にタップ → 一時停止 / 再開 ── */
       document.getElementById('scene').addEventListener('click', (e) => {
-        if (!playOverlay.classList.contains('gone')) return; // まだ再生前
-        if (endScreen.classList.contains('visible')) return; // エンドスクリーン表示中
+        if (!playOverlay.classList.contains('gone')) return;
+        if (endScreen.classList.contains('visible')) return;
         if (vid.paused) {
           vid.play().catch(() => {});
         } else {
@@ -447,42 +418,37 @@
         }
       });
 
-      /* ── 一時停止 → プログレスバー表示 ── */
       vid.addEventListener('pause', () => {
         if (!vid.ended) progressBar.classList.add('visible');
       });
 
-      /* ── 進行状況を随時更新 ── */
       vid.addEventListener('timeupdate', () => {
         if (vid.duration) {
           progressFill.style.width = (vid.currentTime / vid.duration * 100) + '%';
         }
       });
 
-      /* ── 動画終了 → バー非表示 + end screen 表示 ── */
       vid.addEventListener('ended', () => {
         progressBar.classList.remove('visible');
         showEndScreen();
       });
 
-      /* ── もういちど再生ボタン ── */
       replayBtn.addEventListener('click', () => {
         hideEndScreen();
         vid.currentTime = 0;
         vid.play().catch(() => {});
       });
 
-      /* ── QR 読み込みボタン：カメラ起動 ── */
-      document.getElementById('qr-btn').addEventListener('click', () => {
+      qrBtn.addEventListener('click', () => {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = 'image/*';
-        input.capture = 'environment'; // 背面カメラを優先
+        input.capture = 'environment';
         document.body.appendChild(input);
         input.click();
         const cleanup = () => { if (input.parentNode) input.remove(); };
         input.addEventListener('change', cleanup);
-        setTimeout(cleanup, 60000); // 1分後に自動クリーンアップ
+        setTimeout(cleanup, 60000);
       });
     })();
   </script>
